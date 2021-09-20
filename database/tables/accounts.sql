@@ -6,7 +6,7 @@
 CREATE TABLE Accounts (
     Account_ID Number(12),
     Document_Number Number(20) Not Null,
-    Balance_Amount Number(10,1) Default 0.0
+    Balance_Amount Number(12,2) Default 0.0
 );
 
 ALTER TABLE Accounts ADD CONSTRAINT Accounts_PK PRIMARY KEY (Account_ID);

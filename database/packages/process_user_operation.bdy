@@ -81,7 +81,7 @@ CREATE or REPLACE PACKAGE BODY Process_User_Operation AS
     IS
         OBJECT_NAME VarChar2(30) := 'Post_Transactions';
         New_Transaction_ID Number(12);
-        Transaction_Amount Number(10,1);
+        Transaction_Amount Number(12,2);
         Exception_Invalid_Operation EXCEPTION;
     BEGIN
         Audit_logger.Put_Log( aLogId=> logid_seq.nextval, aLog_Type => Audit_logger.LOG_LEVEL_INFO,
@@ -91,11 +91,11 @@ CREATE or REPLACE PACKAGE BODY Process_User_Operation AS
 
         New_Transaction_ID := transaction_id_seq.nextval;
         IF operation_type_id = OPERATION_NORMAL_PURCHASE THEN
-            Transaction_Amount := amount * -1;
+            Transaction_Amount := amount * -1.00;
         ELSIF operation_type_id = OPERATION_PURCHASE_WITH_INSTALMENTS THEN
-            Transaction_Amount := amount * -1;
+            Transaction_Amount := amount * -1.00;
         ELSIF operation_type_id = OPERATION_WITHDRAWAL THEN
-            Transaction_Amount := amount * -1;
+            Transaction_Amount := amount * -1.00;
         ELSIF operation_type_id = OPERATION_CREDIT_VOUCHER THEN
             Transaction_Amount := amount;
         ELSE

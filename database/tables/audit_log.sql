@@ -11,7 +11,8 @@ CREATE TABLE AuditLog (
     Key_Identifier Number(12),
     Status_Code Number(12) Default 0,
     Status_Message VarChar2(200),
-    Key_Metadata VarChar2(500)
+    Key_Metadata VarChar2(500),
+    LogTime timestamp(9) DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE AuditLog ADD CONSTRAINT AuditLog_PK PRIMARY KEY (LogId);
