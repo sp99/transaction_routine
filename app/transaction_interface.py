@@ -84,7 +84,7 @@ def not_found(error):
     return make_response(json.dumps({'error': 'Not found'}), 404)
 
 if __name__ == '__main__':
-    api.run() 
+    api.run(host="0.0.0.0") 
 
 
 
