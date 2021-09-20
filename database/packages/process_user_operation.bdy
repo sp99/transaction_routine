@@ -59,6 +59,7 @@ CREATE or REPLACE PACKAGE BODY Process_User_Operation AS
         Insert Into Accounts (Account_ID, Document_Number)
         Values (New_Account_ID, document_number);
         commit;
+        account_id := New_Account_ID;
 
         Audit_logger.Put_Log( aLogId=> logid_seq.nextval, aLog_Type => Audit_logger.LOG_LEVEL_INFO,
                             aObject_Name => OBJECT_NAME, aLog_Marker => Audit_logger.MARK_END,

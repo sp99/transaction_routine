@@ -1,0 +1,4 @@
+Get Accounts: curl -i http://localhost:5000/accounts/3
+Post Accounts: curl -i -H "Content-Type: application/json" -X POST -d '{"document_number": "131313131"}' http://localhost:5000/accounts
+Post Transaction: curl -i -H "Content-Type: application/json" -X POST -d '{"account_id": 1, "operation_type_id": 4, "amount": 123.45}' http://localhost:5000/transactions
+ 
