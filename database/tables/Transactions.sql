@@ -8,6 +8,7 @@ CREATE TABLE Transactions (
     Account_ID Number(12),
     OperationType_ID Number(4),
     Amount Number(12,2) NOT NULL,
+    Balance Number(12,2)
     EventDate timestamp(9) DEFAULT CURRENT_TIMESTAMP
 );
 

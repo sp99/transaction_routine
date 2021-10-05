@@ -84,6 +84,10 @@ CREATE or REPLACE PACKAGE BODY Process_User_Operation AS
         New_Transaction_ID Number(12);
         Transaction_Amount Number(12,2);
         Exception_Invalid_Operation EXCEPTION;
+        Type tTrans is table of Transactions%ROWTYPE;
+        lTrans tTrans;
+        lBalance Number(12,2);
+        lPartialBalance Number(12,2);
     BEGIN
         Audit_logger.Put_Log( aLogId=> logid_seq.nextval, aLog_Type => Audit_logger.LOG_LEVEL_INFO,
                             aObject_Name => OBJECT_NAME, aLog_Marker => Audit_logger.MARK_START,
@@ -103,8 +107,41 @@ CREATE or REPLACE PACKAGE BODY Process_User_Operation AS
             Raise Exception_Invalid_Operation;
         END IF;
 
-        Insert Into Transactions (Transaction_ID, Account_ID, OperationType_ID, Amount)
-        Values (New_Transaction_ID, accountId, operation_type_id, Transaction_Amount);
+        If  operation_type_id = OPERATION_CREDIT_VOUCHER THEN
+            -- Post the payment Amount
+            Insert Into Transactions (Transaction_ID, Account_ID, OperationType_ID, Amount, Balance)
+            Values (New_Transaction_ID, accountId, operation_type_id, Transaction_Amount, Transaction_Amount);
+            lBalance := Transaction_Amount;
+            lPartialBalance := 0;
+
+            -- Find the previous transacitons of the same account
+            Select * bulk collect into lTrans From Transactions where Balance > 0 and Account_ID = accountId order by Transaction_ID Asc;
+            For inx in 1..lTrans.Count
+            loop
+              If lBalance > 0 Then
+                If lTrans(inx).Balance <= lBalance Then
+                    -- Deduct the balance and discharg ethe transaction
+                    -- Update the prev transactions sorted by transaction id descending
+                    Update Transactions Set Balance = 0 Where transaction_id = lTrans(inx).transaction_id;
+                    -- Update the payment balance
+                    lBalance := lBalance - lTrans(inx).Balance;
+                Else
+                    -- handle partial transaction here
+                    lPartialBalance := lTrans(inx).Balance - lBalance;
+                    lBalance := 0;
+                    Update Transactions Set Balance = lPartialBalance Where transaction_id = lTrans(inx).transaction_id;
+                End If;
+                Update Transactions Set Balance = lBalance Where transaction_id = New_Transaction_ID;
+                Commit;
+              Else
+                --Payment Exhausted, Exit loop
+                Exit;
+              End If;
+            end loop;
+        Else
+            Insert Into Transactions (Transaction_ID, Account_ID, OperationType_ID, Amount, Balance)
+            Values (New_Transaction_ID, accountId, operation_type_id, Transaction_Amount, amount);
+        End If;
 
         Update Accounts
         Set Balance_Amount = Balance_Amount + Transaction_Amount
